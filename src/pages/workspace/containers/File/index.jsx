@@ -2,20 +2,27 @@ import React from 'react';
 import { useEffect, useState } from "react";
 import axios from 'axios';
 
-const File = () =>{
-	
-	const JSZip = require("jszip");
+import JSZip from "jszip";
+import jsUntar from 'js-untar';
+
+import './style.css';
+
+const File = () => {
 	//state
 	const [uploadFile, setUploadFile] = useState('');
 	const [fileList, setFileList] = useState([]);
+	const [selectFile, setSelectFile] = useState('');
+	const [contents, setContents] = useState('편집할 파일 선택.');
+	const [fileExtension, setFileExtension] = useState('');
 	//state
 	
-	const handleFileUpload = (e) => {
+	const handleFileUpload = (e) => { // 1
 		const fileDetail = e.target.files[0];
 		//file name 확장자 .zip or .tar 뽑아내기.
-		const fileExtension = fileDetail.name.substr(fileDetail.name.length-3);
+		const ext = fileDetail.name.substr(fileDetail.name.length-3);
 		
-		if(['zip','tar'].includes(fileExtension)){
+		if(['zip','tar'].includes(ext)){
+			setFileExtension(ext);
 			setUploadFile(fileDetail);
 		}
 		else{
@@ -25,25 +32,72 @@ const File = () =>{
 		
 		
 	};
-	const getFileList = (e) => {
-		const file = uploadFile;
+	const handleDirecClick = () =>{
+		alert('directory는 편집할 수 없습니다.');
+	};
+	const handleFileClick = (name) => {
+		setSelectFile(name);
+		
+		axios.get('api/file/contents', {params : {filename : name}})
+			.then(({data}) => {
+			console.log(data);
+			setContents(data);
+		})
+	};
+	const showFileList = () =>{
+		// let rootFileName = uploadFile.name;
+		// if (rootFileName){
+		// 	rootFileName = rootFileName.substr(0, rootFileName.length - 4) + '/';
+		// }
+		console.log("여기여기",fileList);
+		const list = fileList.map((file, i) => {
+			const handleFileClickWithName = () => handleFileClick(file.name)
+			return (
+					<li
+						key={i}
+						className={(selectFile === file.name ? 'text-success' : '')} 
+						onClick={file.name.substr(file.name.length-1) === "/" ? handleDirecClick : handleFileClickWithName}>
+						{file.name}
+					</li>
+				)
+		})
+		return list;
+	};
+	const getFileList = (e) => { // 3
 		const reader = new FileReader();
 		
 		reader.onload = (e) => {
-			JSZip.loadAsync(e.target.result).then((obj) =>{
-				setFileList(Object.values(obj.files));
-				console.log(Object.values(obj.files));
-			})
+			console.log(e.target.result);
 			
-			reader.error = (e) => {
-				alert('fail to open file');
+			if (fileExtension === "tar"){
+				const list = [];
+				jsUntar(e.target.result)
+				// .progress(function(extractedFile) {
+				// 	console.log(extractedFile);
+				// })
+				.then(function(extractedFiles) {
+					setFileList(extractedFiles);
+					console.log(extractedFiles);
+				});
+				
 			}
-			reader.readAsArrayBuffer(file);
+			else{
+				JSZip.loadAsync(e.target.result).then((obj) =>{
+					setFileList(Object.values(obj.files));
+					console.log("here"+Object.values(obj.files));
+				})
+				
+			}
+	
 		}
+		reader.onerror = (e) => {
+			alert('fail to open file');
+		}
+		reader.readAsArrayBuffer(uploadFile);
 		
 	};
 	// 파일 제출 후, axios 통신을 통해 api post로 파일을 저장.
-	const handleFileSubmit = (e) => {
+	const handleFileSubmit = (e) => { // 2
 		if(!uploadFile){
 			alert('파일을 먼저 선택해 주세요');
 		}
@@ -51,7 +105,8 @@ const File = () =>{
 			const formData = new FormData();
 			formData.append('file', uploadFile);
 			
-			axios.post('api/file/upload', formData).then(({data}) => {
+			axios.post('api/file/upload', formData).then(({ data }) => {
+				console.log(data);
 				if (data){
 					getFileList(e);
 				}
@@ -66,23 +121,24 @@ const File = () =>{
 	const handleContentsSave = () => {
 		
 	};
+
 	
 	return(
-		<div className="file-managing">
-				<div className="file-upload">
+		<div className="file-managing mt-5">
+			
+				<div className="file-upload d-flex align-items-center justify-content-center">
 					<input type="file" name="file" onChange={handleFileUpload}></input>
-					<button type="button" className="file-upload-btn" onClick={handleFileSubmit}>업로드</button>
+					<button type="button" className="file-upload-btn btn btn-info" onClick={handleFileSubmit}>업로드</button>
 				</div>
 				<div className="file-list-container">
 					<ul>
-						
-						
+						{fileList.length === 0? '업로드를 해주세요': showFileList()}
 					</ul>
 				</div>
-				<div className="file-edit-container">
-					<textarea onChange={handleEditContents}>
+				<div className="file-edit-container d-flex align-items-center justify-content-center">
+					<textarea style={{width:"100%",height:"250px"}} value={contents} onChange={handleEditContents}>
 					</textarea>
-					<button type="button" onClick={handleContentsSave}>
+					<button type="button" className="btn btn-primary" onClick={handleContentsSave}>
 						저장
 					</button>
 				</div>

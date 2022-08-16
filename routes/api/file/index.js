@@ -9,6 +9,7 @@ const path = require('path');
 // adm-zip: zip 파일 압축해제 라이브러리
 // rimraf: rm --rf 명령어(파일/폴더 삭제)를 윈도에서도 사용할 수 있게 해주는 패키지
 const upload = require('../../../upload');
+let location = ""; // unzip 파일이 저장된 위치.
 //파일 저장 & unzip
 router.post('/upload', async (req, res, next)=>{
 	try{
@@ -22,8 +23,7 @@ router.post('/upload', async (req, res, next)=>{
 			}
 			// unzip
 			const filePath = req.file.path;
-			console.log(filePath);
-			const location = path.join(__dirname, '../../../upload/unzip/') + req.session.user.id;
+			location = path.join(__dirname, '../../../upload/unzip/') + req.session.user.id;
 			const fileExtension = filePath.substr(filePath.length-3);
 			
 			//unzip .tar file
@@ -53,4 +53,15 @@ router.post('/upload', async (req, res, next)=>{
 		console.error(err);
 	} 
 });
+
+router.get('/contents', async (req, res, next) =>{
+	try{
+		const {filename} = req.query;
+		const contents = fs.readFileSync(location + '/'+filename, 'utf8');
+		res.send(contents);
+	}
+	catch (err){
+		console.error(err);
+	}
+})
 module.exports = router;
