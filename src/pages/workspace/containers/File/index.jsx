@@ -24,6 +24,10 @@ const File = () => {
 		if(['zip','tar'].includes(ext)){
 			setFileExtension(ext);
 			setUploadFile(fileDetail);
+			//새로 다른 파일을 upload 하려 할 때 이전 값을 초기화시킴.
+			setSelectFile('');
+			setFileList('');
+			setContents('');
 		}
 		else{
 			e.target.value = '';
@@ -38,9 +42,8 @@ const File = () => {
 	const handleFileClick = (name) => {
 		setSelectFile(name);
 		
-		axios.get('api/file/contents', {params : {filename : name}})
+		axios.get('api/file/contents', {params : {fileName : name}})
 			.then(({data}) => {
-			console.log(data);
 			setContents(data);
 		})
 	};
@@ -49,7 +52,6 @@ const File = () => {
 		// if (rootFileName){
 		// 	rootFileName = rootFileName.substr(0, rootFileName.length - 4) + '/';
 		// }
-		console.log("여기여기",fileList);
 		const list = fileList.map((file, i) => {
 			const handleFileClickWithName = () => handleFileClick(file.name)
 			return (
@@ -115,11 +117,30 @@ const File = () => {
 		}
 		
 	};
-	const handleEditContents = () => {
+	const handleEditContents = (e) => {
+		//setcontents
+		setContents(e.target.value);
 		
 	};
-	const handleContentsSave = () => {
-		
+	const handleContentsSave = (e) => {
+		// axios post api 호출. + api -> fill 로 가서 edit처리 + db에 저장.
+		if(selectFile){
+			axios.put('api/file/contents',{
+				fileName: selectFile,
+				contents: contents,
+			}).then(({data})=>{
+				if (data){
+					alert('저장했습니다!');
+					setUploadFile('');
+					setSelectFile('');
+					setContents('편집할 파일 선택');
+				}
+				else{
+					alert('저장에 실패했습니다.');
+				}
+				
+			})
+		}
 	};
 
 	

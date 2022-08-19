@@ -56,11 +56,23 @@ router.post('/upload', async (req, res, next)=>{
 
 router.get('/contents', async (req, res, next) =>{
 	try{
-		const {filename} = req.query;
-		const contents = fs.readFileSync(location + '/'+filename, 'utf8');
+		const {fileName} = req.query;
+		const contents = fs.readFileSync(location + '/'+fileName, 'utf8');
 		res.send(contents);
 	}
 	catch (err){
+		console.error(err);
+	}
+})
+
+router.put('/contents', async (req, res, next) => {
+	try{
+		const {fileName, contents} = req.body;
+		fs.writeFileSync(location + '/'+fileName, contents, 'utf8',(error)=>{
+			console.log("file write error");
+		});
+		res.send(true);
+	}catch(err){
 		console.error(err);
 	}
 })
