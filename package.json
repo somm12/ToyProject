@@ -33,6 +33,7 @@
 		"reactstrap": "^8.10.1",
 		"redis": "^2.8.0",
 		"serialize-javascript": "^1.9.1",
+		"socket.io": "^4.5.1",
 		"tar": "^6.1.11",
 		"tar-stream": "^2.2.0",
 		"zlib": "^1.0.5"

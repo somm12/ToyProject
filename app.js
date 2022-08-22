@@ -59,6 +59,8 @@ const main = () => {
 	initMongo().then(() => {
 		const redisClient = initRedis();
 		const server = initExpress(redisClient);
+		const socket = require('./socket');
+		socket(server);
 	});
 };
 
