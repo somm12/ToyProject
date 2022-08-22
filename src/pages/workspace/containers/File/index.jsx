@@ -5,7 +5,6 @@ import axios from 'axios';
 import JSZip from "jszip";
 import jsUntar from 'js-untar';
 
-import './style.css';
 
 const File = () => {
 	//state

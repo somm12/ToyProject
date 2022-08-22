@@ -73,15 +73,16 @@ const Chat = () => {
 		const currentState = {
 			user: user,
 			type: messageType,
-			message: message;
+			message: message,
 		};
 		
 		if(messageType === 'private'){
 			currentState.receiver = receiver;
 			currentState.receiverSockectId = receiverSockectId;
 		}
+		console.log(currentState);
 		//db상에서 message 저장.
-		axios.post('/api/chat/message').then(() => {
+		axios.post('/api/chat/message', currentState).then(() => {
 			
 			socket.emit('sendMessage', currentState);
 			setReceiver('');
@@ -99,32 +100,38 @@ const Chat = () => {
 		}
 	}
 	const showPreviousChat = () => {
-		return(
-			{
-				messageList.map((chat, i) => {
-					<MessageContainer
-						key={i}
-						me={user}
-						oneOfUsers={chat.user}
-						message={chat.message}
-						type={chat.type}
-						receiver={chat.receiver}
-						/>
-				})
-			}
-		)
+		const list = messageList.map((chat, i) => {
+			return (
+				<MessageContainer
+					key={i}
+					me={user}
+					oneOfUsers={chat.user}
+					message={chat.message}
+					type={chat.type}
+					receiver={chat.receiver}
+					/>
+			)
+		});
+		
+		return list;
 	};
 	const showUserList = () => {
 		
-		const list = userList.map((oneOfUsers, i)) => {
+		const list = userList.map((oneOfUsers, i) => {
 			return(
-				{(oneOfUsers !== user) && 
-				(<option className="whisper" value={i} key={i}>{user.username}</option>)}
+				<option className="whisper" value={i} key={i}>{user.username}</option>
 			)
-		};
+		});
 		return list;
 		
 	};
+	const handleDeleteDB = () => {
+		axios.delete('/api/chat/delete').then(()=>{
+			console.log('데이터 삭제');
+		}).catch((error) => {
+			console.error(error);
+		});
+	}
 
 	useState(()=>{
 		initChat();
@@ -148,6 +155,7 @@ const Chat = () => {
 					onClick={handleSendMessage}>
 					전송
 				</button>
+				<button onClick={handleDeleteDB}></button>
 			</div>
 		</div>
 		

@@ -3,8 +3,8 @@ const mongoose = require('mongoose');
 const {Schema} = mongoose;
 const {Types: {ObjectId}} = Schema;// account user 스키마 참조.
 
-const chatSchema = {
-	user : {
+const chatSchema = new Schema({
+	user: {
 		type: ObjectId,
 		require: true,
 		ref: 'account',
@@ -14,7 +14,12 @@ const chatSchema = {
 		require: true,
 		default: 'public',
 	},
-	contents: {
+	receiver:{
+		type: ObjectId,
+		ref: 'account',
+	}
+	,
+	message: {
 		type: String,
 		require: true,
 	},
@@ -24,6 +29,6 @@ const chatSchema = {
 		default: Date.now,
 	}
 
-};
+});
 
 module.exports = mongoose.model('chat', chatSchema);

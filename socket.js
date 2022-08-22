@@ -1,5 +1,5 @@
 module.exports = (server) =>{
-	const io = require('socket.io')(server);
+	const io = require('socket.io')(server, { path: '/socket.io'});
 	
 	
 	io.on('connection', (socket) => {
