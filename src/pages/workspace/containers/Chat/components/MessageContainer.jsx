@@ -2,7 +2,7 @@ import React from 'react';
 import { useEffect, useState } from "react";
 
 const MessageContainer = 
-	  (me, oneOfUsers, message, type, receiver) => {
+	  ({me, oneOfUsers, message, type, receiver}) => {
 		  const messageClassName = () => {
 			  if (me === oneOfUsers){// 유저가 나 자신일때
 				  return 'my-message'
@@ -21,7 +21,7 @@ const MessageContainer =
 			  <div className="message-wrapper">
 				  <div className="message-user-name">{oneOfUsers}</div>
 				  <div className={messageClassName()}>
-					  {type === 'public'? message : `👂 to ${receiver}\n` + message}
+					  {type === 'public'? message : `👂 to ${receiver} : ` + message}
 				  </div>
 			  </div>
 		  );

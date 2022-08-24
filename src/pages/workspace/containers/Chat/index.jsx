@@ -10,6 +10,8 @@ const socket = io.connect("https://mission-thals-hofhu.run.goorm.io", {
 
 const Chat = () => {
 	
+	
+	let users = [];
 	const [user, setUser] = useState('');
 	const [receiver, setReceiver] = useState('');
 	const [receiverSockectId, setReceiverSocketId] = useState('');
@@ -23,13 +25,12 @@ const Chat = () => {
 		axios.get('/api/account/id').then(({data})=>{
 			setUser(data);
 			//현재 user가 가지고 있었던 이전 chat기록을 가져옴.
-			axios.get(`/api/chat/previous?username=${user}`).then(({data}) => {
+			axios.get(`/api/chat/previous?username=${data}`).then(({data}) => {
 				setMessageList(data);
 			});
-
 			socket.emit('join', ({
-				username: user,
-			}))
+				username: data,
+			}),userList)
 			
 		});
 		
@@ -37,32 +38,41 @@ const Chat = () => {
 		//프론트상에서 emit('join')이후 => 백엔드에서 userList 업데이트 후,
 		//프론트로 다시 업데이트 된 arr 전송.
 		socket.on('newUserList',(list) => {
+			console.log(list,"new userlist");
 			setUserList(list);
+			console.log(userList);
 		});
+		
+			// 메세지 리스트에 최근 메시지를 업데이트.
+		socket.on('getMessage',(msgList)=>{
+			console.log(msgList,"check");
+			setMessageList(msgList);
+		});
+			
 	};
-	// 메세지 리스트에 최근 메시지를 업데이트.
-	socket.on('getMessage',(obj)=>{
-		const temp = messageList;
-		temp.push(obj);
-		setMessageList(temp);
-	});
+
+		
 	
 	// 어떤 사용자에게 귓속말을 선택시, (타입, 받는사람, 받는사람의 socketId 업데이트)
 	const handleChangeSelect = (e) => {
-		console.log(e.target.value);
-		if(userList[e.target.value].username === user){
-			alert('"나" 에게 귓속말은 할 수 없습니다');
-		}
+		
 		
 		if(e.target.value === "default"){
 			setMessageType('public');
 			
 		}
+		//귓속말 선택시,
 		else{
-			const index = e.target.value;
-			setMessageType('private');
-			setReceiver(userList[index].username);
-			setReceiverSocketId(userList[index].socketId);
+			if (userList[e.target.value].username === user){
+				alert('"나" 에게 귓속말은 할 수 없습니다');
+			}
+			else{
+				const index = e.target.value;
+				setMessageType('private');
+				setReceiver(userList[index].username);
+				setReceiverSocketId(userList[index].socketId);
+			}
+			
 		}
 	};
 	
@@ -75,16 +85,17 @@ const Chat = () => {
 			type: messageType,
 			message: message,
 		};
+		console.log("message list",messageList);
 		
 		if(messageType === 'private'){
 			currentState.receiver = receiver;
 			currentState.receiverSockectId = receiverSockectId;
+			console.log(receiver, receiverSockectId,"받는사람정보");
 		}
-		console.log(currentState);
 		//db상에서 message 저장.
 		axios.post('/api/chat/message', currentState).then(() => {
 			
-			socket.emit('sendMessage', currentState);
+			socket.emit('sendMessage', messageList,currentState);
 			setReceiver('');
 			setReceiverSocketId('');
 			setMessageType('public');
@@ -97,10 +108,13 @@ const Chat = () => {
 	const handleEnterPress = (e) => {
 		if (e.key === 'Enter'){
 			handleSendMessage();
+			e.target.value = "";
 		}
+		
 	}
 	const showPreviousChat = () => {
 		const list = messageList.map((chat, i) => {
+			
 			return (
 				<MessageContainer
 					key={i}
@@ -119,7 +133,7 @@ const Chat = () => {
 		
 		const list = userList.map((oneOfUsers, i) => {
 			return(
-				<option className="whisper" value={i} key={i}>{user.username}</option>
+				<option className="whisper" value={i} key={i}>{oneOfUsers.username}</option>
 			)
 		});
 		return list;
@@ -140,7 +154,7 @@ const Chat = () => {
 	return(
 		<div className="chat-wrapper">
 			<div className="chat-board">
-				
+				{showPreviousChat()}
 			</div>
 			<div className="chat-input">
 				<select onChange={handleChangeSelect}>
@@ -155,7 +169,7 @@ const Chat = () => {
 					onClick={handleSendMessage}>
 					전송
 				</button>
-				<button onClick={handleDeleteDB}></button>
+				<button onClick={handleDeleteDB}>private메세지 삭제</button>
 			</div>
 		</div>
 		

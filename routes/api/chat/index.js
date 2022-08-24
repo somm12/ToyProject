@@ -8,23 +8,24 @@ const findAllMessage = async (user) => {
 	
 	const me = await User.findOne({id: user});
 	console.log(me, "me");
+	//전체 채팅 or 내가 받은 귓속말 or 내가 보낸 메세지를 가져옴.
 	const foundChats = await Chat
 		.find()
 		.or([{user: me}, {receiver: me}, {type: 'public'}])
 		.populate(['user','receiver'])
 		.sort('created');
 	console.log(foundChats, "foundchats");
-	// foundChats.forEach((arr) => {
-	// 	console.log(arr+"here");
-	// 	const receiverId = (arr.type === 'public') ? '': arr.receiver.id;
+	foundChats.forEach((arr) => {
+		console.log(arr+"here");
+		const receiverId = (arr.type === 'public') ? '': arr.receiver.id;
 		
-	// 	preMessageList.push({
-	// 		user: arr.user.id,
-	// 		message: arr.message,
-	// 		type: arr.type,
-	// 		receiver: receiverId
-	// 	});
-	// });
+		preMessageList.push({
+			user: arr.user.id,
+			message: arr.message,
+			type: arr.type,
+			receiver: receiverId
+		});
+	});
 	
 	return preMessageList;
 };
@@ -34,15 +35,16 @@ const appendMessageToDB = async (req) => {
 	console.log("here",data);
 	const user = await User.findOne({id: data.user});
 	
-	data.user = user?._id;// 모르겠음.
+	data.user = user._id;//
+	console.log(data.user);
 	if(data.type === "private"){
 		const receiver = await User.findOne({id: data.receiver});
-		data.receiver = receiver?._id;
+		data.receiver = receiver._id;
 	}
 	
-	// const newMessageInfo = new modelChat(data);
-	// await newMessageInfo.save();
-	const newMessageInfo = await Chat.create(data);
+	const newMessageInfo = new Chat(data);
+	await newMessageInfo.save();
+	// const newMessageInfo = await Chat.create(data);
 	
 	
 	return true;
@@ -50,8 +52,8 @@ const appendMessageToDB = async (req) => {
 
 router.get('/previous', async(req, res, next) => {
 	try {
-		const data = await findAllMessage(req.query.username);
-		res.send(data);
+		const pastChats = await findAllMessage(req.query.username);
+		res.send(pastChats);
 	} catch(err){
 		console.error(err);
 	}
@@ -68,7 +70,7 @@ router.post('/message', async(req, res, next) => {
 });
 
 router.delete('/delete', async(req, res, next) => {
-	const cb = await Chat.deleteMany({ type: 'public' });
+	const cb = await Chat.deleteMany({ type: 'private' });
 	console.log(cb.deletedCount);
 });
 module.exports = router;
