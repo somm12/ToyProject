@@ -1,0 +1,23 @@
+body{
+	background-color: greenyellow;
+}
+.Chat{
+	border: 1px solid black;
+    padding: 15px;
+	
+	.bg-secondary {
+    	background-color: #aac1e1;
+	}
+	
+	.chat-board{
+		padding: 15px;
+	}
+	.chat-input{
+		display: flex;
+	}
+	.chat-input .message-input{
+		width: 650px;
+	}
+}
+
+

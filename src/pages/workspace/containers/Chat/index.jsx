@@ -2,6 +2,7 @@ import React from 'react';
 import { useEffect, useState } from "react";
 import axios from 'axios';
 import MessageContainer from './components/MessageContainer';
+import style from './style.css';
 
 const socket = io.connect("https://mission-thals-hofhu.run.goorm.io", {
 	path: '/socket.io',
@@ -11,25 +12,25 @@ const socket = io.connect("https://mission-thals-hofhu.run.goorm.io", {
 const Chat = () => {
 	
 	
-	let users = [];
 	const [user, setUser] = useState('');
 	const [receiver, setReceiver] = useState('');
-	const [receiverSockectId, setReceiverSocketId] = useState('');
+	const [receiverSocketId, setReceiverSocketId] = useState('');
 	const [messageType, setMessageType] = useState('public');
 	const [message, setMessage] = useState('');
 	const [messageList, setMessageList] = useState([]);// 이전 메세지들 리스트
 	const [userList, setUserList] = useState([]);// {username:xx, socketId:xxxx}로 구성
+	const [notice, setNotice] = useState('');
 	
 	const initChat = () => {
 		//현재 user의 id를 가져옴.
-		axios.get('/api/account/id').then(({data})=>{
-			setUser(data);
+		axios.get('/api/account/id').then(({data: username})=>{
+			setUser(username);
 			//현재 user가 가지고 있었던 이전 chat기록을 가져옴.
-			axios.get(`/api/chat/previous?username=${data}`).then(({data}) => {
-				setMessageList(data);
+			axios.get(`/api/chat/previous?username=${username}`).then(({data: msgList}) => {
+				setMessageList(msgList);
 			});
 			socket.emit('join', ({
-				username: data,
+				username: username,
 			}),userList)
 			
 		});
@@ -48,7 +49,15 @@ const Chat = () => {
 			console.log(msgList,"check");
 			setMessageList(msgList);
 		});
-			
+		
+		socket.on('someoneLeft', (user) => {
+			console.log(`${user}님이 방을 나가셨습니다.`);
+			setNotice(`${user}님이 방을 나가셨습니다.`);
+		});
+		
+		socket.on('someoneJoin', (user) => {
+			setNotice(`${user}님이 방에 들어왔습니다.`);
+		});
 	};
 
 		
@@ -80,7 +89,7 @@ const Chat = () => {
 		setMessage(e.target.value);
 	};
 	const handleSendMessage = () => {
-		const currentState = {
+		const currentMsg = {
 			user: user,
 			type: messageType,
 			message: message,
@@ -88,14 +97,14 @@ const Chat = () => {
 		console.log("message list",messageList);
 		
 		if(messageType === 'private'){
-			currentState.receiver = receiver;
-			currentState.receiverSockectId = receiverSockectId;
-			console.log(receiver, receiverSockectId,"받는사람정보");
+			currentMsg.receiver = receiver;
+			currentMsg.receiverSocketId = receiverSocketId;
+			console.log(receiver, receiverSocketId,"받는사람정보");
 		}
 		//db상에서 message 저장.
-		axios.post('/api/chat/message', currentState).then(() => {
+		axios.post('/api/chat/message', currentMsg).then(() => {
 			
-			socket.emit('sendMessage', messageList,currentState);
+			socket.emit('sendMessage', messageList,currentMsg);
 			setReceiver('');
 			setReceiverSocketId('');
 			setMessageType('public');
@@ -108,7 +117,7 @@ const Chat = () => {
 	const handleEnterPress = (e) => {
 		if (e.key === 'Enter'){
 			handleSendMessage();
-			e.target.value = "";
+			// e.target.value = "";
 		}
 		
 	}
@@ -152,23 +161,26 @@ const Chat = () => {
 	},[]);
 
 	return(
-		<div className="chat-wrapper">
-			<div className="chat-board">
-				{showPreviousChat()}
-			</div>
-			<div className="chat-input">
-				<select onChange={handleChangeSelect}>
-					<option className="whisper" value="default">귓속말</option>
-					{showUserList()}
-				</select>
-				<input className="message-input" type="text"
-					onChange={handleChangeMessage}
-					onKeyPress={handleEnterPress}
-					placeholder="메세지를 입력해주세요"/>
-				<button className="message-submit-btn" type="button" 
-					onClick={handleSendMessage}>
-					전송
-				</button>
+		<div className="d-flex justify-content-center">
+			<div className="chat w-75 border border-secondary p-3">
+				<div className="chat-board bg-light p-3 text-dark bg-opacity-1">
+					{showPreviousChat()}
+					{notice !== ''? (<div className="notice">{notice}</div>):''}
+				</div>
+				<div className="chat-input d-flex">
+					<select onChange={handleChangeSelect}>
+						<option className="whisper" value="default">귓속말</option>
+						{showUserList()}
+					</select>
+					<input className="w-100 message-input" type="text" value={message}
+						onChange={handleChangeMessage}
+						onKeyPress={handleEnterPress}
+						placeholder="메세지를 입력해주세요"/>
+					<button className="mt-0 message-submit-btn" type="button" 
+						onClick={handleSendMessage}>
+						전송
+					</button>
+				</div>
 				<button onClick={handleDeleteDB}>private메세지 삭제</button>
 			</div>
 		</div>

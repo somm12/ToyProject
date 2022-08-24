@@ -13,3 +13,19 @@
     color: #fff;
     cursor: pointer; }
 
+body {
+  background-color: greenyellow; }
+
+.style__Chat__1wYJDl {
+  border: 1px solid black;
+  padding: 15px; }
+  .style__Chat__1wYJDl .style__bg-secondary__2kns35 {
+    background-color: #aac1e1; }
+  .style__Chat__1wYJDl .style__chat-board__2yGgNR {
+    padding: 15px; }
+  .style__Chat__1wYJDl .style__chat-input__1mfRyL {
+    display: -ms-flexbox;
+    display: flex; }
+  .style__Chat__1wYJDl .style__chat-input__1mfRyL .style__message-input__UpWXv1 {
+    width: 650px; }
+

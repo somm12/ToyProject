@@ -7,14 +7,12 @@ const findAllMessage = async (user) => {
 	const preMessageList = [];
 	
 	const me = await User.findOne({id: user});
-	console.log(me, "me");
 	//전체 채팅 or 내가 받은 귓속말 or 내가 보낸 메세지를 가져옴.
 	const foundChats = await Chat
 		.find()
 		.or([{user: me}, {receiver: me}, {type: 'public'}])
 		.populate(['user','receiver'])
 		.sort('created');
-	console.log(foundChats, "foundchats");
 	foundChats.forEach((arr) => {
 		console.log(arr+"here");
 		const receiverId = (arr.type === 'public') ? '': arr.receiver.id;
@@ -32,11 +30,9 @@ const findAllMessage = async (user) => {
 
 const appendMessageToDB = async (req) => {
 	const data = req.body;
-	console.log("here",data);
 	const user = await User.findOne({id: data.user});
 	
 	data.user = user._id;//
-	console.log(data.user);
 	if(data.type === "private"){
 		const receiver = await User.findOne({id: data.receiver});
 		data.receiver = receiver._id;
