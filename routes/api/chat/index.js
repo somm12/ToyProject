@@ -14,7 +14,6 @@ const findAllMessage = async (user) => {
 		.populate(['user','receiver'])
 		.sort('created');
 	foundChats.forEach((arr) => {
-		console.log(arr+"here");
 		const receiverId = (arr.type === 'public') ? '': arr.receiver.id;
 		
 		preMessageList.push({
@@ -66,7 +65,7 @@ router.post('/message', async(req, res, next) => {
 });
 
 router.delete('/delete', async(req, res, next) => {
-	const cb = await Chat.deleteMany({ type: 'private' });
+	const cb = await Chat.deleteMany({ type: 'private', type: 'public' });
 	console.log(cb.deletedCount);
 });
 module.exports = router;

@@ -1,5 +1,5 @@
 import React from 'react';
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import axios from 'axios';
 import MessageContainer from './components/MessageContainer';
 import style from './style.css';
@@ -11,7 +11,6 @@ const socket = io.connect("https://mission-thals-hofhu.run.goorm.io", {
 
 const Chat = () => {
 	
-	
 	const [user, setUser] = useState('');
 	const [receiver, setReceiver] = useState('');
 	const [receiverSocketId, setReceiverSocketId] = useState('');
@@ -20,6 +19,8 @@ const Chat = () => {
 	const [messageList, setMessageList] = useState([]);// 이전 메세지들 리스트
 	const [userList, setUserList] = useState([]);// {username:xx, socketId:xxxx}로 구성
 	const [notice, setNotice] = useState('');
+	
+	const bottomRef = useRef(null);
 	
 	const initChat = () => {
 		//현재 user의 id를 가져옴.
@@ -31,7 +32,7 @@ const Chat = () => {
 			});
 			socket.emit('join', ({
 				username: username,
-			}),userList)
+			}), userList);
 			
 		});
 		
@@ -39,9 +40,8 @@ const Chat = () => {
 		//프론트상에서 emit('join')이후 => 백엔드에서 userList 업데이트 후,
 		//프론트로 다시 업데이트 된 arr 전송.
 		socket.on('newUserList',(list) => {
-			console.log(list,"new userlist");
+			console.log(list);
 			setUserList(list);
-			console.log(userList);
 		});
 		
 			// 메세지 리스트에 최근 메시지를 업데이트.
@@ -109,6 +109,7 @@ const Chat = () => {
 			setReceiverSocketId('');
 			setMessageType('public');
 			setMessage('');
+			setNotice('');
 			
 		}).catch((error) => {
 			console.error(error);
@@ -156,16 +157,22 @@ const Chat = () => {
 		});
 	}
 
-	useState(()=>{
+	useEffect(() => {
 		initChat();
-	},[]);
-
+	}, []);
+	
+	useEffect(() => {
+    // 👇️ scroll to bottom every time messages change
+    	bottomRef.current?.scrollIntoView({behavior: 'smooth'});
+  	}, [message]);
+	
 	return(
 		<div className="d-flex justify-content-center">
-			<div className="chat w-75 border border-secondary p-3">
-				<div className="chat-board bg-light p-3 text-dark bg-opacity-1">
+			<div className="w-50 border border-secondary p-3" className={style.message_container}>
+				<div className="p-3 text-dark bg-opacity-1" className={style.chat_board} >
 					{showPreviousChat()}
 					{notice !== ''? (<div className="notice">{notice}</div>):''}
+					<div ref={bottomRef} />
 				</div>
 				<div className="chat-input d-flex">
 					<select onChange={handleChangeSelect}>
@@ -176,12 +183,12 @@ const Chat = () => {
 						onChange={handleChangeMessage}
 						onKeyPress={handleEnterPress}
 						placeholder="메세지를 입력해주세요"/>
-					<button className="mt-0 message-submit-btn" type="button" 
+					<button className="mt-0 message-submit-btn" className={style.msg_send_btn} type="button" 
 						onClick={handleSendMessage}>
 						전송
 					</button>
 				</div>
-				<button onClick={handleDeleteDB}>private메세지 삭제</button>
+				<button onClick={handleDeleteDB}>모든 메세지 삭제</button>
 			</div>
 		</div>
 		

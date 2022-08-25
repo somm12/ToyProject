@@ -1,10 +1,12 @@
 import React from 'react';
+import { Button, Input } from 'reactstrap';
 import { useEffect, useState } from "react";
+import { useLocation } from 'react-router-dom';
 import axios from 'axios';
 
 import JSZip from "jszip";
 import jsUntar from 'js-untar';
-
+import style from './style.css';
 
 const File = () => {
 	//state
@@ -14,7 +16,8 @@ const File = () => {
 	const [contents, setContents] = useState('편집할 파일 선택.');
 	const [fileExtension, setFileExtension] = useState('');
 	//state
-	
+	const prop = useLocation();
+	console.log(prop);
 	const handleFileUpload = (e) => { // 1
 		const fileDetail = e.target.files[0];
 		//file name 확장자 .zip or .tar 뽑아내기.
@@ -145,22 +148,21 @@ const File = () => {
 	
 	return(
 		<div className="file-managing mt-5">
-			
 				<div className="file-upload d-flex align-items-center justify-content-center">
-					<input type="file" name="file" onChange={handleFileUpload}></input>
-					<button type="button" className="file-upload-btn btn btn-info" onClick={handleFileSubmit}>업로드</button>
+					<Input className="m-0" type="file" name="file" onChange={handleFileUpload}></Input>
+					<Button outline color="info" className="m-0" onClick={handleFileSubmit}>업로드</Button>
 				</div>
-				<div className="file-list-container">
-					<ul>
+				<div className={style.file_list_container}>
+					<ul className={style.file_ul}>
 						{fileList.length === 0? '업로드를 해주세요': showFileList()}
 					</ul>
 				</div>
 				<div className="file-edit-container d-flex align-items-center justify-content-center">
 					<textarea style={{width:"100%",height:"250px"}} value={contents} onChange={handleEditContents}>
 					</textarea>
-					<button type="button" className="btn btn-primary" onClick={handleContentsSave}>
+					<Button color="primary" type="button" className="btn btn-primary" onClick={handleContentsSave}>
 						저장
-					</button>
+					</Button>
 				</div>
 			</div>
 	);

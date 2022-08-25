@@ -54,6 +54,12 @@ class Signin extends React.Component {
 				this.setState({ errorMsg: getErrorMsg(err.response.status) });
 			});
 	};
+	
+	handleEnter = (e) =>{
+		if (e.key === 'Enter'){
+			this.signIn();
+		}
+	}
 
 	render() {
 		const { id, pw, errorMsg } = this.state;
@@ -65,6 +71,7 @@ class Signin extends React.Component {
 						onChangePw={this.onChangePw}
 						id={id}
 						pw={pw}
+						onKeyPress={this.handleEnter}
 					/>
 					{errorMsg && <FormText>{errorMsg}</FormText>}
 					<AccountButtonGroup

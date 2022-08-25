@@ -1,0 +1,13 @@
+.homePage{
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	height: 93vh;
+}
+.to_file{
+	margin-right:20px;
+	font-size: 25px;
+}
+.to_chat{
+	font-size: 25px;
+}

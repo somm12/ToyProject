@@ -1,0 +1,24 @@
+.message_box,.message_box div{
+	padding: 5px;
+    border-radius: 15px;
+}
+.my_message{
+	display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+		
+}
+.other_message{
+	display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+.msg_mine{
+	background-color: yellow;
+}
+.msg_public{
+	background-color: white;
+}
+.msg_private{
+	background-color: pink;
+}

@@ -1,18 +1,21 @@
 module.exports = (server) =>{
 	const io = require('socket.io')(server, { path: '/socket.io'});
-	
+	let users = [];
 	
 	io.on('connection', (socket) => {
 		let userId = '';
-		let userList = [];// {username:xx, socketId:xxx,} 배열로 구성
+		
+		// {username:xx, socketId:xxx,} 배열로 구성
 		
 		socket.on('join', (newUser, userList) => {
-			
 			socket.join(socket.id);
+			console.log("userList: ",userList);
+			// console.log(io.sockets.adapter.rooms,"<-접속상황");
 			userId = newUser.username;
 			newUser.socketId = socket.id;
-			userList.push(newUser);
-			io.emit('newUserList',userList);
+			users.push(...userList, newUser);
+			
+			io.emit('newUserList', users);
 			io.emit('someoneJoin',userId);
 		})
 		// 전송한 메세지를 가지고 특정 user에게 전달하고, 최근 메세지 정보를
@@ -35,12 +38,11 @@ module.exports = (server) =>{
 		});
 		
 		socket.on('disconnect', () => {
-			
-			userList = userList.filter((user)=> {
+			users = users.filter((user)=> {
 				return user.username !== userId;
 			});
 			io.emit('someoneLeft',userId);
-			io.emit('newUserList',userList);
+			io.emit('newUserList',users);
 		});
 		
 		socket.on('error', (error) =>{

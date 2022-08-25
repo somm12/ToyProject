@@ -1,23 +1,19 @@
-body{
-	background-color: greenyellow;
+.chat_board{
+	padding: 15px;
+	height: 500px;
+	overflow-y: scroll;
+	background-color: #aec0d3;
+    border-radius: 15px;
 }
-.Chat{
-	border: 1px solid black;
-    padding: 15px;
-	
-	.bg-secondary {
-    	background-color: #aac1e1;
-	}
-	
-	.chat-board{
-		padding: 15px;
-	}
-	.chat-input{
-		display: flex;
-	}
-	.chat-input .message-input{
-		width: 650px;
-	}
+.msg_send_btn{
+	border: 0;
+	background-color: #28a745;
+	width: 10%;
+    padding: 8px;
+}
+.message_container{
+	margin-top: 80px;
+	width: 50%;
 }
 
 
