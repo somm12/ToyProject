@@ -1,4 +1,4 @@
-node_modules/
-upload/
-dist/
+/node_modules
+/upload
+/dist
 goorm.manifest
