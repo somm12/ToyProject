@@ -4,12 +4,10 @@ module.exports = (server) =>{
 	
 	io.on('connection', (socket) => {
 		let userId = '';
-		
 		// {username:xx, socketId:xxx,} 배열로 구성
 		
 		socket.on('join', (newUser, userList) => {
 			socket.join(socket.id);
-			console.log("userList: ",userList);
 			// console.log(io.sockets.adapter.rooms,"<-접속상황");
 			userId = newUser.username;
 			newUser.socketId = socket.id;
@@ -38,11 +36,13 @@ module.exports = (server) =>{
 		});
 		
 		socket.on('disconnect', () => {
+			socket.leave(userId);
+			console.log(userId,"<-just left");
 			users = users.filter((user)=> {
 				return user.username !== userId;
 			});
-			io.emit('someoneLeft',userId);
 			io.emit('newUserList',users);
+			io.emit('someoneLeft',userId);
 		});
 		
 		socket.on('error', (error) =>{

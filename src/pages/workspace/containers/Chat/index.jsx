@@ -50,9 +50,9 @@ const Chat = () => {
 			setMessageList(msgList);
 		});
 		
-		socket.on('someoneLeft', (user) => {
-			console.log(`${user}님이 방을 나가셨습니다.`);
-			setNotice(`${user}님이 방을 나가셨습니다.`);
+		socket.on('someoneLeft', (userId) => {
+			console.log(userId,"나가셨어요.");
+			setNotice(`${userId}님이 방을 나가셨습니다.`);
 		});
 		
 		socket.on('someoneJoin', (user) => {
@@ -149,6 +149,8 @@ const Chat = () => {
 		return list;
 		
 	};
+	//handleDeleteDB: 실험용으로 보냈던 메세지들 중에서 
+	//앞전에 쌓인 불필요한 메세지들을 삭제하는 함수. 버튼을 주석처리해놓았음.
 	const handleDeleteDB = () => {
 		axios.delete('/api/chat/delete').then(()=>{
 			console.log('데이터 삭제');
@@ -188,10 +190,9 @@ const Chat = () => {
 						전송
 					</button>
 				</div>
-				<button onClick={handleDeleteDB}>모든 메세지 삭제</button>
 			</div>
 		</div>
-		
+	//<button onClick={handleDeleteDB}>모든 메세지 삭제</button>
 	);
 };
 

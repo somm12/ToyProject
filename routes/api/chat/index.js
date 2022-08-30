@@ -63,7 +63,8 @@ router.post('/message', async(req, res, next) => {
 		console.error(err);
 	}
 });
-
+// 실험용으로 메시지들을 보냈을 때 잘 작동하는지 확인후,
+//앞전에 쌓인 불필요한 메세지들을 삭제하는 api.
 router.delete('/delete', async(req, res, next) => {
 	const cb = await Chat.deleteMany({ type: 'private', type: 'public' });
 	console.log(cb.deletedCount);
